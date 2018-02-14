@@ -15,6 +15,33 @@ namespace ss {
 	public:
 	};
 
+	struct ssGraphicsResources() {
+		IDXGIDevice	     *m_pDXGIDevice { nullptr };
+		IDXGISwapChain1      *m_pSwapChain  { nullptr };
+		ID3D11Device         *m_pD3DDevice  { nullptr };
+		ID2D1Factory1	     *m_pD2DFactory { nullptr };
+		ID2D1Device          *m_pD2DDevice  { nullptr };
+		ID2D1DeviceContext   *m_pContext    { nullptr };
+		ID2D1Bitmap1	     *m_pBackBuffer { nullptr };
+		
+		Release() {
+			if (m_pBackBuffer)
+				m_pBackBuffer->Release();
+			if (m_pSwapChain)
+				m_pSwapChain->Release();
+			if (m_pContext)
+				m_pContext->Release();
+			if (m_pD2DDevice)
+				m_pD2DDevice->Release();
+			if (m_pD2DFactory)
+				m_pD2DFactory->Release();
+			if (m_pD3DDevice)
+				m_pD3DDevice->Release();
+			if (m_pDXGIDevice)
+				m_pDXGIDevice->Release();
+		};
+	};
+	
 	class ssGraphics {
 	public:
 		ssGraphics(HWND hwnd);
