@@ -15,8 +15,8 @@ namespace ss {
 	public:
 	};
 
-	struct ssGraphicsResources() {
-		IDXGIDevice	     *m_pDXGIDevice { nullptr };
+	struct ssGraphicsResources {
+		IDXGIDevice	         *m_pDXGIDevice { nullptr };
 		IDXGISwapChain1      *m_pSwapChain  { nullptr };
 		ID3D11Device         *m_pD3DDevice  { nullptr };
 		ID2D1Factory1	     *m_pD2DFactory { nullptr };
@@ -24,7 +24,7 @@ namespace ss {
 		ID2D1DeviceContext   *m_pContext    { nullptr };
 		ID2D1Bitmap1	     *m_pBackBuffer { nullptr };
 		
-		Release() {
+		void Release() {
 			if (m_pBackBuffer)
 				m_pBackBuffer->Release();
 			if (m_pSwapChain)
