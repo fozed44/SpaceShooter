@@ -10,37 +10,6 @@
 #include <dwrite_1.h>
 
 namespace ss {
-
-	class ssLocator {
-	public:
-	};
-
-	struct ssGraphicsResources {
-		IDXGIDevice	         *m_pDXGIDevice { nullptr };
-		IDXGISwapChain1      *m_pSwapChain  { nullptr };
-		ID3D11Device         *m_pD3DDevice  { nullptr };
-		ID2D1Factory1	     *m_pD2DFactory { nullptr };
-		ID2D1Device          *m_pD2DDevice  { nullptr };
-		ID2D1DeviceContext   *m_pContext    { nullptr };
-		ID2D1Bitmap1	     *m_pBackBuffer { nullptr };
-		
-		void Release() {
-			if (m_pBackBuffer)
-				m_pBackBuffer->Release();
-			if (m_pSwapChain)
-				m_pSwapChain->Release();
-			if (m_pContext)
-				m_pContext->Release();
-			if (m_pD2DDevice)
-				m_pD2DDevice->Release();
-			if (m_pD2DFactory)
-				m_pD2DFactory->Release();
-			if (m_pD3DDevice)
-				m_pD3DDevice->Release();
-			if (m_pDXGIDevice)
-				m_pDXGIDevice->Release();
-		};
-	};
 	
 	class ssGraphics {
 	public:
@@ -49,6 +18,14 @@ namespace ss {
 		
 		void Initialize();
 		void WindowResized();
+
+	public:
+		ssGraphics(ssGraphics&)  = delete;
+		ssGraphics(ssGraphics&&) = delete;
+
+	public:
+		void Present();
+		ID2D1DeviceContext *GetContext();
 
 	private:
 		HRESULT Create3DDevice();
@@ -71,6 +48,48 @@ namespace ss {
 		ID2D1Device          *m_pD2DDevice;
 		ID2D1DeviceContext   *m_pContext;
 		ID2D1Bitmap1	     *m_pBackBuffer;
+	};
+
+	class ssGame {
+	public:
+		ssGame();
+		~ssGame();
+
+		void Tick(unsigned nanoSeconds);
+	private:
+
+		ssGraphics * m_pGraphics;
+	};
+
+	class ssGameLoop {
+	public:
+		ssGameLoop();
+		~ssGameLoop();
+
+		void Run();
+	};
+
+	class ssGlobal {
+	public:
+		~ssGlobal();
+	private:
+		ssGlobal(HWND hwnd);
+
+	public:
+		static ssGlobal* Instance() { return m_pInstance; }
+		static void      Initialize(HWND hwnd);
+		static void		 SafeRelease();
+
+	public:
+		ssGame*     getGame()     { return m_pGame; }
+		ssGraphics* getGraphics() { return m_pGraphics; }
+		ssGameLoop* getGameLoop() { return m_pGameLoop; }
+	private:
+		static ssGlobal* m_pInstance;
+
+		ssGame     *m_pGame    { nullptr };
+		ssGraphics *m_pGraphics{ nullptr };
+		ssGameLoop *m_pGameLoop{ nullptr };
 	};
 
 };

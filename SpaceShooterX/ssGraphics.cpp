@@ -175,14 +175,17 @@ void ssGraphics::CreateDependentResources() {
 
 void ssGraphics::Initialize() {
 	CreateIndependentResources();
-	CreateDependentResources();
-
-	m_pContext->BeginDraw();
-	m_pContext->Clear(D2D1::ColorF(0));
-	m_pContext->EndDraw();
-	m_pSwapChain->Present(1, 0);
+	CreateDependentResources();	
 }
 
 void ssGraphics::WindowResized() {
 	CreateDependentResources();
+}
+
+void ssGraphics::Present() {
+	m_pSwapChain->Present(1, 0);
+}
+
+ID2D1DeviceContext *ssGraphics::GetContext() {
+	return m_pContext;
 }

@@ -156,6 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpaceShooterX.cpp" />
+    <ClCompile Include="ssGame.cpp" />
+    <ClCompile Include="ssGameLoop.cpp" />
+    <ClCompile Include="ssGlobal.cpp" />
     <ClCompile Include="ssGraphics.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
