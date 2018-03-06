@@ -9,8 +9,18 @@
 
 #include <dwrite_1.h>
 
+#include <wincodec.h>
+
+/*
+
+	ssCore
+
+	Defines the core low level direct x classes.
+
+*/
 namespace ss {
 	
+
 	class ssGraphics {
 	public:
 		ssGraphics(HWND hwnd);
@@ -27,6 +37,10 @@ namespace ss {
 		void Present();
 		ID2D1DeviceContext *GetContext();
 
+	public:
+		ID2D1Bitmap *LoadBitmapFromFile(LPCWSTR uri, unsigned int destWidth, unsigned int destHeight);
+		ID2D1Bitmap *LoadBitmapFromResource(LPCWSTR rescourceName, LPCWSTR rescourceType, unsigned int destWidth, unsigned int destHeight);
+
 	private:
 		HRESULT Create3DDevice();
 		void Create2DFactory();
@@ -35,12 +49,14 @@ namespace ss {
 
 		void CreateSwapChain();
 		void CreateBuffers();
+		void CreateImagingFactory();
 
 		void CreateIndependentResources();
 		void CreateDependentResources();
 
 		HWND                m_hwnd;
 
+		IWICImagingFactory2  *m_pImagingFactory;
 		IDXGIDevice			 *m_pDXGIDevice;
 		IDXGISwapChain1      *m_pSwapChain;
 		ID3D11Device         *m_pD3DDevice;
@@ -48,19 +64,42 @@ namespace ss {
 		ID2D1Device          *m_pD2DDevice;
 		ID2D1DeviceContext   *m_pContext;
 		ID2D1Bitmap1	     *m_pBackBuffer;
+
 	};
 
+	/*
+	//++ ssGame
+
+	ssGame is the core game.
+
+		ssGame::Initialize() initializes the game.
+
+		ssGame::Tick(unsigned nanoSeconds) is the number of nano - seconds
+		since the last time Tick was called.This number is managed by the
+		class that is calling Tick.In our case ssGameLoop is the container class
+		and ssGameLoop::Run is the main gameLoop that repeatedly calls
+		ssGame::Tick
+
+	*/
 	class ssGame {
-	public:
-		ssGame();
-		~ssGame();
+		public:
+			ssGame();
+			~ssGame();
 
-		void Tick(unsigned nanoSeconds);
-	private:
+			void Initialize();
+			void Tick(unsigned nanoSeconds);
+		private:
 
-		ssGraphics * m_pGraphics;
+			bool             m_Initialized{ false };
+			ss::ssGraphics  *m_pGraphics{ nullptr };
+			ID2D1Bitmap     *m_pTestBitmap{ nullptr };
 	};
 
+	/*
+	//++ ssGameLoop
+
+		Container for running the game.
+	*/
 	class ssGameLoop {
 	public:
 		ssGameLoop();
@@ -68,7 +107,7 @@ namespace ss {
 
 		void Run();
 	};
-
+	
 	class ssGlobal {
 	public:
 		~ssGlobal();
@@ -91,5 +130,13 @@ namespace ss {
 		ssGraphics *m_pGraphics{ nullptr };
 		ssGameLoop *m_pGameLoop{ nullptr };
 	};
+
+	template <class T> void SafeRelease(T **ppT) {
+		if (*ppT)
+		{
+			(*ppT)->Release();
+			*ppT = NULL;
+		}
+	}
 
 };

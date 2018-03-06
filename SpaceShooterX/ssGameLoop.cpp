@@ -22,7 +22,7 @@ void ssGameLoop::Run() {
 	auto last_frame_time = clock::now();
 
 	auto pGame = ssGlobal::Instance()->getGame();
-
+	pGame->Initialize();
 	while (1)
 	{
 		auto delta_time = clock::now() - last_frame_time;

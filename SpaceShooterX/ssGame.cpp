@@ -1,5 +1,6 @@
 #include "ssCore.h"
 #include <random>
+#include <assert.h>
 
 using namespace ss;
 
@@ -8,10 +9,20 @@ ssGame::~ssGame() {};
 
 int w = 0;
 
+void ssGame::Initialize() {
+	m_pGraphics = ssGlobal::Instance()->getGraphics();
+	
+	m_pTestBitmap = m_pGraphics->LoadBitmapFromFile(
+		L"C:\\Projects\\SpaceShooterX\\SpaceShooterX\\Debug\\ship.png",
+		394, 347
+	);
+	m_Initialized = true;
+}
+
 void ssGame::Tick(unsigned nanoseconds) 
 {
-	auto pGraphics = ssGlobal::Instance()->getGraphics();
-	auto pContext = pGraphics->GetContext();
+	assert(m_Initialized);
+	auto pContext = m_pGraphics->GetContext();
 
 	D2D1_RECT_F rect;
 	rect.left = 0;
@@ -33,8 +44,9 @@ void ssGame::Tick(unsigned nanoseconds)
 	pContext->Clear(D2D1::ColorF(0));
 	pContext->DrawRectangle(rect, pBrush);
 	pContext->DrawRectangle(rect, pFillBrush);
+	pContext->DrawBitmap(m_pTestBitmap);
 	pContext->EndDraw();
-	pGraphics->Present();	
+	m_pGraphics->Present();	
 
 	pBrush->Release();
 	pFillBrush->Release();

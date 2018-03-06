@@ -1,8 +1,10 @@
 #include "ssCore.h"
 #include "DXCommon.h"
+#include "wincodec.h"
 
 #pragma comment (lib, "D3D11.lib")
 #pragma comment (lib, "D2D1.lib")
+#pragma comment (lib, "windowscodecs.lib")
 
 using namespace ss;
 
@@ -105,6 +107,8 @@ void ssGraphics::CreateIndependentResources() {
 	if (FAILED(Create3DDevice()))
 		throw "Failed to create 3d device!";
 
+	CreateImagingFactory();
+
 	Create2DFactory();
 
 	Create2DDevice();
@@ -186,6 +190,91 @@ void ssGraphics::Present() {
 	m_pSwapChain->Present(1, 0);
 }
 
+void ssGraphics::CreateImagingFactory() {
+	HRESULT hr = CoCreateInstance(
+		CLSID_WICImagingFactory2,
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		IID_IWICImagingFactory2,
+		(void**)&m_pImagingFactory
+	);
+	DX::ThrowIfFailed(hr);
+}
+
 ID2D1DeviceContext *ssGraphics::GetContext() {
 	return m_pContext;
 }
+
+ID2D1Bitmap *ssGraphics::LoadBitmapFromFile(
+	LPCWSTR uri,
+	UINT destWidth,
+	UINT destHeight)
+{
+	IWICBitmapDecoder     *pDecoder   = NULL;
+	IWICBitmapFrameDecode *pSource    = NULL;
+	IWICStream            *pStream    = NULL;
+	IWICFormatConverter   *pConverter = NULL;
+	IWICBitmapScaler      *pScaler    = NULL;
+	ID2D1Bitmap           *pResult    = NULL;
+
+	// Create a decoder based on the filename passed to us.
+	HRESULT hr = m_pImagingFactory->CreateDecoderFromFilename(
+		uri,
+		NULL,
+		GENERIC_READ,
+		WICDecodeMetadataCacheOnLoad,
+		&pDecoder
+	);
+	DX::ThrowIfFailed(hr);
+
+	// Assume that the file has a single frame, and we are loading the bitmap
+	// from that single frame.
+	hr = pDecoder->GetFrame(0, &pSource);
+	DX::ThrowIfFailed(hr);
+
+	// Create a FormatConverter... regardless of the format of the image data
+	// in the file passed to us, the bitmap we are creating will be in the format
+	// 32bppPBGRA
+	hr = m_pImagingFactory->CreateFormatConverter(&pConverter);
+	DX::ThrowIfFailed(hr);
+
+	// Initialize the format converter.
+	pConverter->Initialize(
+		pSource,
+		GUID_WICPixelFormat32bppPBGRA,
+		WICBitmapDitherTypeNone,
+		NULL,
+		0.0f,
+		WICBitmapPaletteTypeMedianCut
+	);
+	DX::ThrowIfFailed(hr);
+
+	// Create the bitmap
+	hr = m_pContext->CreateBitmapFromWicBitmap(
+		pConverter,
+		NULL,
+		&pResult
+	);
+	DX::ThrowIfFailed(hr);
+
+	SafeRelease(&pDecoder);
+	SafeRelease(&pSource);
+	SafeRelease(&pStream);
+	SafeRelease(&pConverter);
+	SafeRelease(&pScaler);
+	
+	return pResult;
+}
+
+
+ID2D1Bitmap *ssGraphics::LoadBitmapFromResource(
+	LPCWSTR resourceName,
+	LPCWSTR resourceType,
+	UINT destWidth,
+	UINT destHeight
+)
+{
+	return nullptr;
+}
+
+
